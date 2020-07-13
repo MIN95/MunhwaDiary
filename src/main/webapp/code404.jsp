@@ -11,7 +11,7 @@
 <script language="javascript">
 function fncGoAfterErrorPage(){
     history.back(-2);
-}
+} 
 </script>
 </head>
 
