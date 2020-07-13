@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+      "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="playDAO">
+ 
+   	<!-- 사용자가 달력에 추가해놓은 공연리스트 호출 --> 
+   	<select id="selectMonthPlayList" resultType="playVo">     
+	   	SELECT @RNUM :=@RNUM +1 AS ROWNO, p.*
+         FROM  
+         (  
+	    	SELECT * FROM myplay mp join play p ON mp.mp_seq = p.seq 
+	    	 <![CDATA[
+		        WHERE startDate < date(#{startDate}) AND endDate > date(#{endDate}) OR endDate BETWEEN date(#{startDate}) AND date(#{endDate})
+		        OR startDate BETWEEN date(#{startDate}) AND date(#{endDate}) AND endDate > date(#{endDate}) OR endDate BETWEEN date(#{startDate}) AND date(#{endDate})
+	        ]]>   
+        ) p WHERE p.mp_userId = #{p_userId} and (@RNUM:=0)=0 ORDER BY p.regDate     
+   	</select> 
+   
+	<!-- 클릭된 날짜에 진행되고 있는 공연정보 호출 -->
+	<select id="selectDayMyPlayList" resultType="playVo">
+		SELECT @RNUM :=@RNUM +1 AS ROWNO, p.*
+         FROM 
+         (         
+         	SELECT * FROM myplay mp join play p ON mp.mp_seq = p.seq 
+            <![CDATA[
+               WHERE startDate <= date(#{startDate}) AND endDate >= date(#{startDate}) 
+            ]]>
+         ) p  WHERE p.mp_userId = #{p_userId} and (@RNUM:=0)=0 ORDER BY p.regDate DESC LIMIT #{startPoint},4     
+   	</select>
+   	
+   <!-- 클릭된 날짜에 진행되고 있는 공연갯수 카운트 -->
+   	<select id="countMyPlay" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) FROM 
+			( 	
+		   		SELECT * FROM myplay mp join play p ON mp.mp_seq = p.seq 
+				WHERE startDate <= date(#{startDate}) AND endDate >= date(#{startDate}) 
+			) p WHERE p.mp_userId = #{p_userId} 
+		]]>
+	</select>
+   
+   	<!-- 공연이 등록돼있는지 확인 -->
+   	<select id="confirmPlayList" resultType="int">
+		SELECT COUNT(*) FROM play WHERE seq=#{seq}
+   	</select>
+   	
+   	<!-- 내 캘린더의 해당 공연 추가유무확인 -->
+   	<select id="confirmMyPlay" resultType="int">
+		SELECT COUNT(*) FROM myplay WHERE mp_seq=#{seq} AND mp_userId = #{p_userId}
+   	</select>
+   
+   <!-- 달력에 출력할 공연정보 등록 -->
+   <insert id="insertPlay" parameterType="playVo">
+      INSERT INTO play (seq,title,realmName,startDate,endDate,imgUrl,place) VALUES (#{seq},#{title},#{realmName},date(#{startDate}),date(#{endDate}),#{imgUrl},#{place});
+   </insert>
+   
+   <!-- 공연정보를 가져올 시퀀스 등록 -->
+   <insert id="insertMyPlay" parameterType="playVo">
+      INSERT INTO myplay (mp_seq,mp_userId) VALUES (#{seq},#{p_userId});
+   </insert>
+   
+   <!-- 공연정보가 참조되고 있는지 확인 -->
+   <select id="confirmOtherList" resultType="Integer">
+      SELECT COUNT(*) FROM myplay WHERE mp_seq=#{seq}
+   </select>
+   
+   <!-- 내가 공연에 대한글을 몇개썼는지 -->
+   	<select id="confirmMyPlayList" resultType="int">
+		SELECT COUNT(*) FROM mydiary WHERE mdSeq=#{seq} and md_userId=#{p_userId}
+   	</select>   	
+   
+   <!-- 사용자의 myplay테이블에서만 공연seq삭제 -->
+   <delete id="deleteMyPlay" parameterType="playVo">
+      DELETE FROM myplay WHERE mp_seq=#{seq} and mp_userId=#{p_userId}
+   </delete>
+    
+   <!-- 공연정보삭제 -->
+   <delete id="deletePlay" parameterType="playVo">
+      DELETE FROM play WHERE seq=#{seq}
+   </delete>
+   
+</mapper>

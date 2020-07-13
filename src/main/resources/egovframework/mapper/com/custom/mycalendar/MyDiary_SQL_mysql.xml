@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+      "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="myDiaryDAO">
+	<resultMap type="egovframework.com.custom.mycalendar.service.MyDiaryVo" id="diaryMap">
+		<result property="diaryTitle" column="diaryTitle" />
+		<result property="diaryContents" column="diaryContents" />
+		<result property="diaryDate" column="diaryDate" />
+		<result property="mdSeq" column="mdSeq" />
+		<result property="myDiarySeq" column="myDiarySeq" />
+	</resultMap>
+
+	<!-- db에서 mydiary정보  호출 -->
+	<select id="selectMyDiaryList" resultMap="diaryMap">
+		<choose>
+		    <when test="endDate != null">
+				SELECT diaryTitle,diaryDate FROM mydiary 
+		      	WHERE DATE_FORMAT(diaryDate,'%Y%m%d') between DATE_FORMAT(date(#{startDate}),'%Y%m%d') AND DATE_FORMAT(date(#{endDate}),'%Y%m%d') AND md_userId=#{md_userId} ORDER BY diaryDate 
+		    </when>
+		    <otherwise> 
+		    	SELECT mdSeq,myDiarySeq,diaryDate,diaryTitle FROM mydiary 
+		      	WHERE DATE_FORMAT(diaryDate,'%Y%m%d') = DATE_FORMAT(date(#{startDate}),'%Y%m%d') AND md_userId=#{md_userId} ORDER BY diaryDate 
+		    </otherwise>
+  		</choose> 
+	</select>
+	
+	<select id="selectMyDiary" resultType="myDiaryVo">
+	<choose>
+		<when test='mdSeq.equals("0")'>
+			SELECT * FROM mydiary 
+		      	WHERE DATE_FORMAT(diaryDate,'%Y%m%d') = DATE_FORMAT(date(#{startDate}),'%Y%m%d') 
+		      	AND myDiarySeq = #{myDiarySeq}
+		      	AND md_userId=#{md_userId} 
+		</when>
+		<otherwise>
+			SELECT * FROM mydiary md join play p ON #{mdSeq} = p.seq
+	      	WHERE DATE_FORMAT(diaryDate,'%Y%m%d') = DATE_FORMAT(date(#{startDate}),'%Y%m%d') 
+	      	AND myDiarySeq = #{myDiarySeq}
+	      	AND md_userId=#{md_userId} 	
+		</otherwise>
+	</choose>
+	</select>
+	
+	<!-- 클릭된 날짜에 작성한 총일기 갯수 -->
+   	<select id="countMyDiary" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) FROM  
+			( 	
+		   		SELECT * FROM mydiary WHERE DATE_FORMAT(diaryDate,'%Y%m%d') = DATE_FORMAT(date(#{startDate}),'%Y%m%d') 
+			) m WHERE md_userId=#{md_userId} 
+		]]>
+	</select>
+	
+	<!-- 일기작성 -->
+	<insert id="insertMyDiary" parameterType="myDiaryVo">
+		INSERT INTO mydiary (md_userId,diaryDate,diaryTitle,diaryContents,mdSeq) VALUES (#{md_userId},#{diaryDate},#{diaryTitle},#{diaryContents},#{mdSeq})
+	</insert>
+	
+	<!-- 일기삭제 -->
+	<delete id="deleteMyDiary" parameterType="playVo">
+		DELETE FROM mydiary WHERE myDiarySeq=#{myDiarySeq} AND md_userId=#{md_userId}
+	</delete>
+	
+	<!-- 일기수정 -->
+	<update id="updateMyDiary" parameterType="playVo">
+		UPDATE mydiary SET diaryDate=#{diaryDate},diaryTitle=#{diaryTitle},diaryContents=#{diaryContents} WHERE myDiarySeq=#{myDiarySeq}
+	</update>
+</mapper>

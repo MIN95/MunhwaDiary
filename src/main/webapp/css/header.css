@@ -1,0 +1,71 @@
+@charset "UTF-8";
+html, body {
+		width:100%;
+		height:630px;
+        margin: 0;
+        padding: 0;
+        font-family: 'Nanum Gothic', extra-bold;     
+        font-size: 14px;
+      }
+      
+	h2 {
+     	padding: 0;
+     	margin: 0;
+     }
+    
+    #myHeader {
+    	width: 100%;
+    	height: 150px;
+    	border: none;
+    	background-color: #E0E3DA;
+    }
+      
+	#myHeader span{
+		font-family: 'Song Myung', bold;
+     }
+     
+   	#myHeader #logo {
+		width:180px;
+		height: 60px;
+		line-height:145px;
+		padding:20px;
+		font-size: 30px;
+		font-weight: bold;
+		color: white;
+   	}
+   	
+   	#myHeader>a {
+   		 text-decoration: none;
+   	}
+   	
+   	#myHeader #queryBox {
+	   	display: inline-block;
+	   	position: absolute;
+   	}
+   	
+   	
+	#myHeader #query {
+        border-style: none;
+        margin-top : 53px; 
+        border-radius:5px;
+        width: 350px;
+        height: 36px; 
+    }
+    
+    #myHeader .menu{
+    	font-family: 'Song Myung', bold;
+    	font-size: 20px;
+    	color: #4a4a4a;
+    	cursor: pointer;
+    }
+    
+     #myHeader .menu:hover {
+     	font-weight: bold;
+     }
+    
+    #searchIcon {
+    	cursor: pointer;
+    	position: absolute;
+    	left: 320px;
+    	top:58px;"
+    }
